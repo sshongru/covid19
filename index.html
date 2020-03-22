@@ -8,6 +8,9 @@
       fieldset {
         display: inline-block;
       }
+      .population {
+        color: rgba(0,0,0,0.25);
+      }
     </style>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -232,40 +235,54 @@
     <div>
       <h2>Cases Over Time</h2>
       <fieldset>
-        <legend>Canada</legend>
-        <label for="chk-bc"><input type="checkbox" id="chk-bc" value="British Columbia" checked> British Columbia</label>
-        <label for="chk-ab"><input type="checkbox" id="chk-ab" value="Alberta" checked> Alberta</label>
-        <label for="chk-on"><input type="checkbox" id="chk-on" value="Ontario"> Ontario</label>
-        <label for="chk-qb"><input type="checkbox" id="chk-qb" value="Quebec"> Quebec</label>
-        <label for="chk-mb"><input type="checkbox" id="chk-mb" value="Manitoba"> Manitoba</label>
-        <label for="chk-cd"><input type="checkbox" id="chk-cd" value="Canada"> Canada</label>
+        <legend>Canada <span class="population">(37.6M)</span></legend>
+        <label for="chk-bc"><input type="checkbox" id="chk-bc" value="British Columbia" checked> British Columbia <span class="population">(5.1M)</span></label>
+        <label for="chk-ab"><input type="checkbox" id="chk-ab" value="Alberta" checked> Alberta <span class="population">(4.4M)</span></label>
+        <label for="chk-on"><input type="checkbox" id="chk-on" value="Ontario"> Ontario <span class="population">(14.7M)</span></label>
+        <label for="chk-qb"><input type="checkbox" id="chk-qb" value="Quebec"> Quebec <span class="population">(8.5M)</span></label>
+        <label for="chk-mb"><input type="checkbox" id="chk-mb" value="Manitoba"> Manitoba <span class="population">(1.4M)</span></label>
+        <label for="chk-sk"><input type="checkbox" id="chk-sk" value="Saskatchewan"> Saskatchewan <span class="population">(1.2M)</span></label>
+        <label for="chk-ns"><input type="checkbox" id="chk-ns" value="Nova Scotia"> Nova Scotia <span class="population">(1.0M)</span></label>
+        <label for="chk-nb"><input type="checkbox" id="chk-nb" value="New Brunswick"> New Brunswick <span class="population">(0.8M)</span></label>
+        <label for="chk-pe"><input type="checkbox" id="chk-pe" value="Prince Edward Island"> Prince Edward Island <span class="population">(0.2M)</span></label>
+        <label for="chk-nf"><input type="checkbox" id="chk-nf" value="Newfoundland"> Newfoundland <span class="population">(0.5M)</span></label>
+        <label for="chk-nt"><input type="checkbox" id="chk-nt" value="Northwest Territories"> Northwest Territories <span class="population">(0.04M)</span></label>
       </fieldset>
       <fieldset>
-        <legend>USA</legend>
-        <label for="chk-ca"><input type="checkbox" id="chk-ca" value="California"> California</label>
-        <label for="chk-tt"><input type="checkbox" id="chk-tt" value=", CA"> , CA</label>
-        <label for="chk-ny"><input type="checkbox" id="chk-ny" value="New York"> New York</label>
-        <label for="chk-wa"><input type="checkbox" id="chk-wa" value="Washington"> Washington</label>
-        <label for="chk-fl"><input type="checkbox" id="chk-fl" value="Florida"> Florida</label>
-        <label for="chk-tx"><input type="checkbox" id="chk-tx" value="Texas"> Texas</label>
+        <legend>USA <span class="population">(327.2M)</span></legend>
+        <label for="chk-ca"><input type="checkbox" id="chk-ca" value="California"> California <span class="population">(39.6M)</span></label>
+        <label for="chk-tt"><input type="checkbox" id="chk-tt" value=", CA"> Cal. regional (old) <span class="population">(39.6M)</span></label>
+        <label for="chk-ny"><input type="checkbox" id="chk-ny" value="New York"> New York <span class="population">(19.5M)</span></label>
+        <label for="chk-wa"><input type="checkbox" id="chk-wa" value="Washington"> Washington <span class="population">(7.5M)</span></label>
+        <label for="chk-fl"><input type="checkbox" id="chk-fl" value="Florida"> Florida <span class="population">(21.3M)</span></label>
+        <label for="chk-tx"><input type="checkbox" id="chk-tx" value="Texas"> Texas <span class="population">(28.7M)</span></label>
+        <label for="chk-il"><input type="checkbox" id="chk-il" value="Illinois"> Illinois <span class="population">(12.7M)</span></label>
+        <label for="chk-ma"><input type="checkbox" id="chk-ma" value="Massachusetts"> Massachusetts <span class="population">(6.9M)</span></label>
+        <label for="chk-nv"><input type="checkbox" id="chk-nv" value="Nevada"> Nevada <span class="population">(3.0M)</span></label>
+        <label for="chk-hi"><input type="checkbox" id="chk-hi" value="Hawaii"> Hawaii <span class="population">(1.4M)</span></label>
+        <label for="chk-al"><input type="checkbox" id="chk-al" value="Alaska"> Alaska <span class="population">(0.7M)</span></label>
       </fieldset>
       <fieldset>
         <legend>Europe</legend>
-        <label for="chk-it"><input type="checkbox" id="chk-it" value="Italy"> Italy</label>
-        <label for="chk-fr"><input type="checkbox" id="chk-fr" value="France"> France</label>
-        <label for="chk-de"><input type="checkbox" id="chk-de" value="Germany"> Germany</label>
-        <label for="chk-sp"><input type="checkbox" id="chk-sp" value="Spain"> Spain</label>
-        <label for="chk-uk"><input type="checkbox" id="chk-uk" value="United Kingdom"> United Kingdom</label>
-        <label for="chk-es"><input type="checkbox" id="chk-es" value="Estonia"> Estonia</label>
+        <label for="chk-it"><input type="checkbox" id="chk-it" value="Italy"> Italy <span class="population">(60.5M)</span></label>
+        <label for="chk-fr"><input type="checkbox" id="chk-fr" value="France"> France <span class="population">(67.0M)</span></label>
+        <label for="chk-de"><input type="checkbox" id="chk-de" value="Germany"> Germany <span class="population">(82.8M)</span></label>
+        <label for="chk-sp"><input type="checkbox" id="chk-sp" value="Spain"> Spain <span class="population">(46.6M)</span></label>
+        <label for="chk-uk"><input type="checkbox" id="chk-uk" value="United Kingdom"> United Kingdom <span class="population">(66.4M)</span></label>
+        <label for="chk-su"><input type="checkbox" id="chk-su" value="Switzerland"> Switzerland <span class="population">(8.6M)</span></label>
+        <label for="chk-ne"><input type="checkbox" id="chk-ne" value="Netherlands"> Netherlands <span class="population">(17.2M)</span></label>
+        <label for="chk-es"><input type="checkbox" id="chk-es" value="Estonia"> Estonia <span class="population">(1.3M)</span></label>
       </fieldset>
       <fieldset>
-        <legend>Asia</legend>
-        <label for="chk-tw"><input type="checkbox" id="chk-tw" value="Taiwan" checked> Taiwan</label>
-        <label for="chk-cn"><input type="checkbox" id="chk-cn" value="China"> China</label>
-        <label for="chk-ks"><input type="checkbox" id="chk-ks" value="Korea, South"> Korea, South</label>
-        <label for="chk-jp"><input type="checkbox" id="chk-jp" value="Japan"> Japan</label>
-        <label for="chk-ru"><input type="checkbox" id="chk-ru" value="Russia"> Russia</label>
-        <label for="chk-au"><input type="checkbox" id="chk-au" value="Australia"> Australia</label>
+        <legend>Other</legend>
+        <label for="chk-tw"><input type="checkbox" id="chk-tw" value="Taiwan" checked> Taiwan <span class="population">(23.8M)</span></label>
+        <label for="chk-cn"><input type="checkbox" id="chk-cn" value="China"> China <span class="population">(1,386M)</span></label>
+        <label for="chk-ks"><input type="checkbox" id="chk-ks" value="Korea, South"> Korea, South <span class="population">(51.5M)</span></label>
+        <label for="chk-jp"><input type="checkbox" id="chk-jp" value="Japan"> Japan <span class="population">(126.8M)</span></label>
+        <label for="chk-mo"><input type="checkbox" id="chk-mo" value="Mongolia"> Mongolia <span class="population">(3.1M)</span></label>
+        <label for="chk-ir"><input type="checkbox" id="chk-ir" value="Iran"> Iran <span class="population">(81.2M)</span></label>
+        <label for="chk-tu"><input type="checkbox" id="chk-tu" value="Turkey"> Turkey <span class="population">(80.8M)</span></label>
+        <label for="chk-au"><input type="checkbox" id="chk-au" value="Australia"> Australia <span class="population">(24.6M)</span></label>
       </fieldset>
     </div>
 
