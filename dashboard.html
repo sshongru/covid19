@@ -142,7 +142,7 @@
           chartConfirmed = new google.visualization.AreaChart(document.getElementById('chart-confirmed'));
           chartDeaths = new google.visualization.AreaChart(document.getElementById('chart-deaths'));
           chartRecovered = new google.visualization.AreaChart(document.getElementById('chart-recovered'));
-          
+
           drawCharts();
         })
         .catch(function (err) {
@@ -196,6 +196,8 @@
             hAxis: {title: 'Day', titleTextStyle: {color: '#333'}},
             vAxis: {minValue: 0},
             animation: {
+              duration: 1000,
+              easing: 'inAndOut',
               startup: true
             }
           }
@@ -223,12 +225,12 @@
         <li>Exceed any government recommendations and pressure them to increase those restrictions. You do not want to play chicken with an exponential graph. A one-day delay can cause 40% more deaths.</li>
         <li>News outlets have poor reporting on this issue. Assume reporters got something wrong or asked the wrong stupid questions and seek underlying sources yourself.</li>
         <li>New York Governor Cuomo has <a href="https://www.youtube.com/watch?v=l3h9Z4u4icM">excellent press conferences</a> that are insightful and direct. You can watch live on YouTube each morning.</li>
-        <li>Monitor Johns Hopkins worldwide <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6">case tracker dashboard</a> (if you dare).</li>
+        <li>Monitor Johns Hopkins worldwide <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6">case tracker dashboard</a> for a current macro view.</li>
       </ul>
     </div>
 
     <div>
-      <h2>Cases over Time</h2>
+      <h2>Cases Over Time</h2>
       <fieldset>
         <legend>Canada</legend>
         <label for="chk-bc"><input type="checkbox" id="chk-bc" value="British Columbia" checked> British Columbia</label>
