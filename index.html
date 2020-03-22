@@ -1,16 +1,65 @@
 <html>
   <head>
     <title>COVID-19 Dashboard</title>
+    <link rel="shortcut icon" type="image/png" href="favicon.png">
+    <link rel="shortcut icon" sizes="196x196" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
     <style>
+      body {
+        font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #24292e;
+        padding: 0;
+        margin: 0;
+      }
+
       label {
         display: block;
       }
+
       fieldset {
         display: inline-block;
+        border-color: #eaecef;
+        border-style: solid;
+        border-width: 1px;
       }
+
+      a:link, a:visited {
+        color: #0366d6;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      h1 {
+        font-size: 1.6em;
+        background-color: #204e7d;
+        padding: 6px;
+        color: white;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+      }
+
+      h2 {
+        font-size: 1.5em;
+        background-color: #6babec;
+        padding: 6px;
+        color: white;
+        border-bottom: 1px solid #CCC;
+      }
+
+      section {
+        padding: 5px;
+      }
+
       .population {
         color: rgba(0,0,0,0.25);
       }
+
     </style>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -219,20 +268,25 @@
   <body>
     <h1>COVID-19 Dashboard</h1>
 
-    <h2>Disclaimer</h2>
-    <p>Take all data and opinions displayed here with a very large grain of salt. There are bugs and missing information.</p>
+    <section>
 
-    <div>
+      <div>
+        <h2>Disclaimer</h2>
+        <p>All data, thoughts, and opinions here are for my personal use only. Be sure to cross check this data with other sources before using it for other purposes. There are bugs and the data is incomplete, inaccurate, and definitely not scientific.</p>
+      </div>
+
       <h2>Tips</h2>
       <ul>
         <li>Exceed any government recommendations and pressure them to increase those restrictions. You do not want to play chicken with an exponential graph.</li>
-        <li>News outlets have poor reporting on this issue. Assume reporters are getting it wrong or asking stupid questions and seek underlying sources yourself.</li>
-        <li>New York Governor Cuomo has excellent press conferences that are insightful and direct. They often include very useful PowerPoint slides. You can watch live on YouTube each morning. Here's a <a href="https://www.youtube.com/playlist?list=PLmsB3ro8hsUgcZUcWCUC9g1uMg1VzIrXJ">YouTube playlist</a> of the latest ones.</li>
-        <li>Monitor Johns Hopkins worldwide <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6">case tracker dashboard</a> for a current macro view.</li>
+        <li>Assume media coverage is sensationalizing the wrong things. This is simultaneously better and worse than they are reporting. Assume reporters are getting it wrong or asking stupid questions and seek underlying sources yourself.</li>
+        <li><a href="https://www.youtube.com/playlist?list=PLmsB3ro8hsUgcZUcWCUC9g1uMg1VzIrXJ" target="_blank">Watch New York Governor Andrew Cuomo's press conferences on YouTube</a> each morning. They are an excellent source of useful data and context that is insightful, direct, and sometimes darkly amusing.</li>
+        <li><a href="https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6" target="_blank">Monitor Johns Hopkins worldwide case tracker dashboard</a> for a current macro view.</li>
+        <li><a href="https://www.washingtonpost.com/graphics/2020/world/corona-simulator/">Read this short Washington Post article</a> that shows simple simulation animations of how different containment strategies play out</li>
+        <li><a href="https://medium.com/@tomaspueyo/coronavirus-act-today-or-people-will-die-f4d3d9cd99ca">Read this long Medium article on why you must act now</a>, understand Chart 7 in detail, learn how to use death rates to estimate spread, and learn how to convince people in power to act now.</li>
       </ul>
-    </div>
+    </section>
 
-    <div>
+    <section>
       <h2>Cases Over Time</h2>
       <fieldset>
         <legend>Canada <span class="population">(37.6M)</span></legend>
@@ -284,18 +338,20 @@
         <label for="chk-tu"><input type="checkbox" id="chk-tu" value="Turkey"> Turkey <span class="population">(80.8M)</span></label>
         <label for="chk-au"><input type="checkbox" id="chk-au" value="Australia"> Australia <span class="population">(24.6M)</span></label>
       </fieldset>
-    </div>
 
-    <div id="chart-confirmed" style="width: 100%; height: 600px;"></div>
-    <div id="chart-deaths" style="width: 100%; height: 600px;"></div>
-    <div id="chart-recovered" style="width: 100%; height: 600px;"></div>
+      <div id="chart-confirmed" style="width: 100%; height: 600px;"></div>
+      <div id="chart-deaths" style="width: 100%; height: 600px;"></div>
+      <div id="chart-recovered" style="width: 100%; height: 600px;"></div>
+      <p>Disclaimer: Recovery data is not very well reported in most jurisdictions</p>
 
-    <p>Source: <a href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series">Johns Hopkins Center for Systems Science and Engineering</a></p>
-    <p>Data is updated once a day typically around 6pm Pacific Time. See <a href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data">GitHub</a> for latest commit time.</p>
+      <p>Source: <a href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series" target="_blank">Johns Hopkins Center for Systems Science and Engineering</a></p>
+      <p>Data is updated once a day typically around 6pm Pacific Time. See <a href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data" target="_blank">GitHub</a> for latest commit time.</p>
+    </section>
 
-    <h2>Impact Estimations</h2>
-
-    <p>TODO: Build an estimate algorithm for ICU beds vs. capacity for a region</p>
+    <section>
+      <h2>Impact Estimations</h2>
+      <p>TODO: Build an estimate algorithm for ICU beds vs. capacity for a region</p>
+    </section>
 
   </body>
 </html>
