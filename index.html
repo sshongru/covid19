@@ -446,31 +446,77 @@
         </table>
       </div>
 
+      <div>
+        <h3>British Columbia, Canada</h3>
+        <table>
+          <tr>
+            <td>Population</td>
+            <td><a href="https://bcstats.shinyapps.io/popApp/">5,071,336</a></td>
+          </tr>
+          <tr>
+            <td>Demographics</td>
+            <td>65+: <a href="https://bcstats.shinyapps.io/popApp/">18.7%</a></td>
+          </tr>
+          <tr>
+            <td>Hospital Capacity</td>
+            <td>Beds: Unknown <br>
+              Current Occupancy:  <span class="unknown">Unknown</span><br>
+              ICU Beds: <span class="unknown">Unknown</span><br>
+              Ventilators: <span class="unknown">Unknown</span><br>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div>
+        <h3>Alberta, Canada</h3>
+        <table>
+          <tr>
+            <td>Population</td>
+            <td><a href="https://www.google.com/publicdata/explore?ds=z8mqirbqgu9tsm_&met_y=population&idim=territory:CA01:CA02:CA11&hl=en&dl=en#!ctype=l&strail=false&bcs=d&nselm=h&met_y=population&scale_y=lin&ind_y=false&rdim=country&idim=territory:CA01:CA02:CA08:CA10&ifdim=country&hl=en_US&dl=en&ind=false">4,371,300</a></td>
+          </tr>
+          <tr>
+            <td>Demographics</td>
+            <td>65+: TODO</td>
+          </tr>
+          <tr>
+            <td>Hospital Capacity</td>
+            <td>Beds: <span class="unknown">Unknown</span><br>
+              Current Occupancy:  <span class="unknown">Unknown</span><br>
+              ICU Beds: <span class="unknown">Unknown</span><br>
+              Ventilators: <span class="unknown">Unknown</span><br>
+            </td>
+          </tr>
+        </table>
+      </div>
+
       <h3>Estimating Hospital Bed Needs</h3>
       <p>Warning: This is an incredibly naive estimation model that assumes everyone goes to the hospital at the same time</p>
       <div class="select-group">
         <div class="select">
           <span>Area Population</span>
-          <label><input type="radio" name="radioButtonGroupPopulation" title="33,761" value="33761" data-bedsTotal="224" data-bedsICU="7" checked> Penticton</label>
-          <label><input type="radio" name="radioButtonGroupPopulation" title="19,500,000" value="19500000" data-bedsTotal="51000" data-bedsICU="3000"> New York</label>
+          <label><input type="radio" name="radioButtonGroupPopulation" title="33,761" value="33761" checked> Penticton</label>
+          <label><input type="radio" name="radioButtonGroupPopulation" title="4,371,300" value="4371300"> Alberta</label>
+          <label><input type="radio" name="radioButtonGroupPopulation" title="5,071,000" value="5071000"> British Columbia</label>          
+          <label><input type="radio" name="radioButtonGroupPopulation" title="19,500,000" value="19500000"> New York</label>
         </div>
         &times;
         <div class="select">
           <span>Infection Rate</span>
-          <label><input type="radio" name="radioButtonGroupRateInfection" value="0.028" checked> 2.8% - South Korea (<a href="https://www.cdc.go.kr/board/board.es?mid=&bid=0030" target="_blank">?</a>)</label>
-          <label><input type="radio" name="radioButtonGroupRateInfection" value="0.026"> 2.6% - BC (<a href="https://news.gov.bc.ca/releases/2020EMBC0013-000548" target="_blank">?</a>)</label>
+          <label><input type="radio" name="radioButtonGroupRateInfection" value="0.028"> 2.8% - South Korea (<a href="https://www.cdc.go.kr/board/board.es?mid=&bid=0030" target="_blank">?</a>)</label>
+          <label><input type="radio" name="radioButtonGroupRateInfection" value="0.023" checked> 2.3% - BC (<a href="https://news.gov.bc.ca/releases/2020EMBC0014-000555" target="_blank">?</a>)</label>
         </div>
         &times;
         <div class="select">
           <span>Hospitalization Rate</span>
-          <label><input type="radio" name="radioButtonGroupRateHospital" value="0.15" checked> 15% - New York State (<a href="https://youtu.be/mK3dx97W_AM?t=1093" target="_blank">?</a>)</label>
-          <label><input type="radio" name="radioButtonGroupRateHospital" value="0.07"> 7% - BC Interior Health (<a href="https://news.gov.bc.ca/releases/2020EMBC0013-000548" target="_blank">?</a>)</label>
+          <label><input type="radio" name="radioButtonGroupRateHospital" value="0.15"> 15% - New York State (<a href="https://youtu.be/mK3dx97W_AM?t=1093" target="_blank">?</a>)</label>
+          <label><input type="radio" name="radioButtonGroupRateHospital" value="0.096" checked> 9.6% - BC (<a href="https://news.gov.bc.ca/releases/2020EMBC0014-000555" target="_blank">?</a>)</label>
         </div>
         &times;
         <div class="select">
           <span>ICU Rate (of hospitalizations)</span>
-          <label><input type="radio" name="radioButtonGroupRateICU" value="0.24" checked> 24% - New York State (<a href="https://youtu.be/mK3dx97W_AM?t=1093" target="_blank">?</a>)</label>
-          <label><input type="radio" name="radioButtonGroupRateICU" value="0.42"> 42% - BC Interior Health (<a href="https://news.gov.bc.ca/releases/2020EMBC0013-000548" target="_blank">?</a>)</label>
+          <label><input type="radio" name="radioButtonGroupRateICU" value="0.24"> 24% - New York State (<a href="https://youtu.be/mK3dx97W_AM?t=1093" target="_blank">?</a>)</label>
+          <label><input type="radio" name="radioButtonGroupRateICU" value="0.39" checked> 39% - BC (<a href="https://news.gov.bc.ca/releases/2020EMBC0014-000555" target="_blank">?</a>)</label>
         </div>
         =
         Need <span class="select-group-output">TODO</span> ICU beds
