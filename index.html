@@ -5,13 +5,20 @@
     <link rel="shortcut icon" sizes="196x196" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
     <style>
-      body {
+      body, p, td {
         font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
         font-size: 14px;
         line-height: 1.5;
         color: #24292e;
+      }
+
+      body {
         padding: 0;
         margin: 0;
+      }
+
+      iframe {
+        border: 0;
       }
 
       label {
@@ -94,9 +101,14 @@
       var sourceURLConfirmed = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
       var sourceURLDeaths    = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv';
 
+      var sourceURLUSAConfirmed = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv'
+      var sourceURLUSADeaths    = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv'
+
       var sourceURLs = [
         sourceURLConfirmed,
-        sourceURLDeaths
+        sourceURLDeaths,
+        sourceURLUSAConfirmed,
+        sourceURLUSADeaths
       ];
 
       var lineDelimiter = '\n';
@@ -114,18 +126,28 @@
       //   ',Taiwan*,23.7,121,1,1,3,3,4,5,...
       //   'British Columbia,Canada,49.2827,-123.1207,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2...
       // ];
+      //
+      // TODO: USA Data is slightly different than worldwide data. For now we hardcode two paths quick and dirty, but should come back and clean this up
 
       // which lines to draw on the graph
       var filters;
+      var filtersUSA;
 
       // holds list of checkboxes on the page
       var checkboxes;
+      var checkboxesUSA;
 
       var chartConfirmed;
+      var chartDeaths;
+
+      var chartUSAConfirmed;
+      var chartUSADeaths;
 
       // API response data
       var responseTextConfirmed;
       var responseTextDeaths;
+      var responseTextUSAConfirmed;
+      var responseTextUSADeaths;
 
       google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(init);
@@ -162,8 +184,13 @@
       };
 
       function getLabel(string){
-        var parts = columnSplit(string)
+        var parts = columnSplit(string);
         return parts[0] + ' ' + parts[1];
+      }
+
+      function getLabelUSA(string){
+        var parts = columnSplit(string);
+        return parts[10];
       }
 
       function filterRows(row){
@@ -175,9 +202,20 @@
         }
       }
 
+      function filterRowsUSA(row){
+        for (var i = 0; i < filtersUSA.length; i++){
+          var filter = filtersUSA[i];
+          if (row.indexOf(filter) > -1){
+            return true;
+          }
+        }
+      }
+
       function calculateFilters(){
           filters = [];
-          checkboxes.forEach(input => {if (input.checked){ filters.push(input.value)}});
+          filtersUSA = [];
+          checkboxes.forEach(input    => {if (input.checked){ filters.push(input.value)}});
+          checkboxesUSA.forEach(input => {if (input.checked){ filtersUSA.push(input.value)}});
       }
 
       function handleInput(event){
@@ -203,8 +241,11 @@
 
       function init(){
         // watch for changes in text inputs
-        checkboxes = document.querySelectorAll( '.casesOverTime input' );
+        checkboxes = document.querySelectorAll( '.casesOverTime .worldwide input' );
         checkboxes.forEach(input => input.addEventListener( 'input', handleInput ));
+
+        checkboxesUSA = document.querySelectorAll( '.casesOverTime .usa input' );
+        checkboxesUSA.forEach(input => input.addEventListener( 'input', handleInput ));
 
         // calculate the initial filters
         calculateFilters();
@@ -243,14 +284,23 @@
           responseTextConfirmed = result[0];
           responseTextDeaths = result[1];
 
+          responseTextUSAConfirmed = result[2];
+          responseTextUSADeaths = result[3];
+
           chartConfirmed = new google.visualization.AreaChart(document.getElementById('chart-confirmed'));
           chartDeaths = new google.visualization.AreaChart(document.getElementById('chart-deaths'));
+
+          chartUSAConfirmed = new google.visualization.AreaChart(document.getElementById('chart-usa-confirmed'));
+          // chartUSADeaths = new google.visualization.AreaChart(document.getElementById('chart-usa-deaths'));
 
           drawCharts();
 
           // listen for chart interaction
           google.visualization.events.addListener(chartConfirmed, 'select', function() { handleChartSelection(chartConfirmed); });
           google.visualization.events.addListener(chartDeaths,    'select', function() { handleChartSelection(chartDeaths);    });
+
+          google.visualization.events.addListener(chartUSAConfirmed, 'select', function() { handleChartSelection(chartUSAConfirmed); });
+          // google.visualization.events.addListener(chartUSADeaths,    'select', function() { handleChartSelection(chartUSADeaths);    });
               
         })
         .catch(function (err) {
@@ -298,6 +348,48 @@
         return workingArray;
       }
 
+      function getChartUSAArray(responseText){
+
+        //                                Province/State,Country/Region,Lat,Long,
+        //UID,iso2,iso3,code3,FIPS,Admin2,Province_State,Country_Region,Lat,Long_,Combined_Key,
+        var rows = responseText.split(lineDelimiter);
+        var headerRow = rows[0];
+        var dataRows = rows.slice(1); // remove the header row
+        var columnHeaders = columnSplit(headerRow);
+        var numIgnoredColumns = 11; // the UID,iso2,iso3,code3,FIPS,Admin2,Province_State,Country_Region,Lat,Long_,Combined_Key columns should be ignored when dealing with the raw data columns
+        
+        // which rows we want to graph as lines
+        var targetRows = dataRows.filter(filterRowsUSA);
+
+        // transpose this data into a format Google Charts is expecting...
+
+        var workingArray = [];
+        var numLines = targetRows.length;
+        var numPoints = columnHeaders.length - numIgnoredColumns;
+
+        workingArray[0] = ['Date'];
+
+        // get the column labels
+        for (var i = 0; i < numLines; i++){
+          workingArray[0].push(getLabelUSA(targetRows[i]));
+        }
+
+        for (var i = 0; i < numPoints; i++){
+          var pointArray = [];
+
+          // label
+          pointArray.push( columnHeaders[i+numIgnoredColumns]);
+
+          for (var j = 0; j < numLines; j++){
+            var targetRowPoints = columnSplit(targetRows[j]);
+            pointArray.push( parseInt(targetRowPoints[i+numIgnoredColumns]) );
+          }
+
+          workingArray.push(pointArray);
+        }
+        return workingArray;
+      }
+
       function drawCharts(){
           var defaultOptions = {
             title: 'Chart',
@@ -321,6 +413,12 @@
 
           chartDeaths.draw(google.visualization.arrayToDataTable(getChartArray(responseTextDeaths)), 
                           Object.assign({}, defaultOptions, { title: 'Deaths Over Time'}));
+
+          chartUSAConfirmed.draw(google.visualization.arrayToDataTable(getChartUSAArray(responseTextUSAConfirmed)),
+                              Object.assign({}, defaultOptions, { title: 'Confirmed Cases Over Time'}));
+
+          // chartUSADeaths.draw(google.visualization.arrayToDataTable(getChartUSAArray(responseTextUSADeaths)), 
+          //                 Object.assign({}, defaultOptions, { title: 'Deaths Over Time'}));
       }
     </script>
   </head>
@@ -329,33 +427,9 @@
 
     <section>
       <div>
-        <h2>Introduction</h2>
-        <p>I have multiple travel or group events scheduled over 2020/2021 and have had to cancel many of them. I use as much raw data as possible to inform these cancellation decisions. This dashboard attempts to bring together information I've manually calculated over the past few weeks so it's easier to monitor the situation as other events come closer</p>
-        <p>Events:</p>
-        <ul>
-          <li>Cancelled: <s>March 2020 - Group travel involving British Columbia, California, Illinios, New York, Nevada</s></li>
-          <li>Cancelled: <s>April 2020 - Large family gathering including group travel involving British Columbia, Alberta, California, Illinios, New York, Taiwan</s></li>
-          <li>Cancelled: <s>May 2020 - Individual travel involving California, UK, France, Turkey, Spain, Germany</s></li>
-          <li>At Risk: July 2020 - Individual travel involving British Columbia, California</li>
-          <li>At Risk: Fall 2020 - Group travel involving British Columbia, California, Taiwan</li>
-          <li>At Risk: Spring 2020 - Large family gathering including group travel involving British Columbia, Alberta, California, Illinios, New York, Taiwan</li>
-        </ul>
-      </div>
-
-      <div>
         <h2>Disclaimer</h2>
         <p>All data, thoughts, and opinions here are for my personal use only. Be sure to cross check this data with other sources before using it for other purposes. There are bugs and the data is incomplete, inaccurate, and definitely not scientific.</p>
       </div>
-
-      <h2>Tips</h2>
-      <ul>
-        <li>Exceed any government recommendations and pressure them to increase those restrictions. You do not want to play chicken with an exponential graph.</li>
-        <li>Assume media coverage is sensationalizing the wrong things. This situation is simultaneously better and worse than they are reporting. Assume reporters are getting it wrong or asking stupid questions and seek underlying sources yourself.</li>
-        <li><a href="https://www.youtube.com/playlist?list=PLmsB3ro8hsUgcZUcWCUC9g1uMg1VzIrXJ" target="_blank">Watch New York Governor Andrew Cuomo's press conferences on YouTube</a> each morning. They are an excellent source of useful data and context that is insightful, direct, and sometimes darkly amusing.</li>
-        <li><a href="https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6" target="_blank">Monitor Johns Hopkins worldwide case tracker dashboard</a> for a current macro view.</li>
-        <li><a href="https://www.washingtonpost.com/graphics/2020/world/corona-simulator/">Read this short Washington Post article</a> that shows simple simulation animations of how different containment strategies play out</li>
-        <li><a href="https://medium.com/@tomaspueyo/coronavirus-act-today-or-people-will-die-f4d3d9cd99ca">Read this long Medium article on why you must act now</a>, understand Chart 7 in detail, learn how to use death rates to estimate spread, and learn how to convince people in power to act now.</li>
-      </ul>
 
       <h2>Interesting Links</h2>
       <ul>
@@ -377,13 +451,12 @@
         <li><a href="https://youtu.be/0Z_ZjcZOaug?t=2046" target="_blank">Facial Covering Recommendatio - April 3 Press Conference</a>
           <ul>
             <li>Doesn't replace the need for social distancing</li>
-            <li>Potential downfalls must be acknowledged
-              Most importnat thing: We don't want people to have a false sense of security with face coverings
+            <li>Potential downfalls must be acknowledged.
+              Most important thing: We don't want people to have a false sense of security with face coverings
           </ul>
         </li>
         <li><a href="https://assets.documentcloud.org/documents/6840663/Governmentpacket.pdf">Guidelines for Opening Up America Again</a></li>
         <li><a href="https://www.sccgov.org/sites/covid19/Pages/order-health-officer-050420.aspx?mc_cid=634de84af2&mc_eid=775870ac90">Santa Clara County Order - April 29, 2020</a></li>
-        <li><a href="https://www.sccgov.org/sites/covid19/Pages/bay-area-health-officer-indicator.aspx">Santa Clara County Indicators</a></li>
         <li><a href="https://coronavirus.jhu.edu/testing/individual-states/california">California testing rate</a></li>
         <li><a href="https://www.arcgis.com/apps/opsdashboard/index.html#/409af567637846e3b5d4182fcd779bea" target="_blank">Johns Hopkins USA Dashboard - By County</a>
           <ul>
@@ -402,73 +475,111 @@
         <li><a href="http://www.bccdc.ca/health-info/diseases-conditions/covid-19/data">British Columbia CDC Data</a>
           <ul>
             <li><a href="https://experience.arcgis.com/experience/a6f23959a8b14bfa989e3cda29297ded" target="_blank">Cases by region Dashboard</a></li>
-            <li><a href="https://bccdc.shinyapps.io/covid19_global_epi_app/" target="_blank">New daily cases per province</li>
+            <li><a href="https://bccdc.shinyapps.io/covid19_global_epi_app/" target="_blank">New daily cases per province</a></li>
           </ul>
         </li>
+        <li><a href="https://covid19risk.biosci.gatech.edu/?asc_bias=5">Event Risk Assessment Planning Tool</a> - Calculate the chances that a person at an event of a given size will have the virus</li>
       </ul>
     </section>
 
     <section class="casesOverTime">
       <h2>Cases Over Time</h2>
-      <fieldset>
-        <legend>Canada <span class="population">(37.6M)</span></legend>
-        <label><input type="checkbox" value="British Columbia" checked> British Columbia <span class="population">(5.1M)</span></label>
-        <label><input type="checkbox" value="Alberta" checked> Alberta <span class="population">(4.4M)</span></label>
-        <label><input type="checkbox" value="Ontario"> Ontario <span class="population">(14.7M)</span></label>
-        <label><input type="checkbox" value="Quebec"> Quebec <span class="population">(8.5M)</span></label>
-        <label><input type="checkbox" value="Manitoba"> Manitoba <span class="population">(1.4M)</span></label>
-        <label><input type="checkbox" value="Saskatchewan"> Saskatchewan <span class="population">(1.2M)</span></label>
-        <label><input type="checkbox" value="Nova Scotia"> Nova Scotia <span class="population">(1.0M)</span></label>
-        <label><input type="checkbox" value="New Brunswick"> New Brunswick <span class="population">(0.8M)</span></label>
-        <label><input type="checkbox" value="Prince Edward Island"> Prince Edward Island <span class="population">(0.2M)</span></label>
-        <label><input type="checkbox" value="Newfoundland"> Newfoundland <span class="population">(0.5M)</span></label>
-        <label><input type="checkbox" value="Northwest Territories"> Northwest Territories <span class="population">(0.04M)</span></label>
-      </fieldset>
-      <fieldset>
-        <legend>USA <span class="population">(327.2M)</span></legend>
-        <label><input type="checkbox" value="US"> US <span class="population">(327.2M)</span></label>
-        <label><input type="checkbox" value="California"> California <span class="population">(39.6M)</span></label>
-        <label><input type="checkbox" value=", CA"> Cal. regional (old) <span class="population">(39.6M)</span></label>
-        <label><input type="checkbox" value="New York"> New York <span class="population">(19.5M)</span></label>
-        <label><input type="checkbox" value="Washington"> Washington <span class="population">(7.5M)</span></label>
-        <label><input type="checkbox" value="Florida"> Florida <span class="population">(21.3M)</span></label>
-        <label><input type="checkbox" value="Texas"> Texas <span class="population">(28.7M)</span></label>
-        <label><input type="checkbox" value="Illinois"> Illinois <span class="population">(12.7M)</span></label>
-        <label><input type="checkbox" value="Massachusetts"> Massachusetts <span class="population">(6.9M)</span></label>
-        <label><input type="checkbox" value="Nevada"> Nevada <span class="population">(3.0M)</span></label>
-        <label><input type="checkbox" value="Hawaii"> Hawaii <span class="population">(1.4M)</span></label>
-        <label><input type="checkbox" value="Alaska"> Alaska <span class="population">(0.7M)</span></label>
-      </fieldset>
-      <fieldset>
-        <legend>Europe</legend>
-        <label><input type="checkbox" value="Italy"> Italy <span class="population">(60.5M)</span></label>
-        <label><input type="checkbox" value="France"> France <span class="population">(67.0M)</span></label>
-        <label><input type="checkbox" value="Germany"> Germany <span class="population">(82.8M)</span></label>
-        <label><input type="checkbox" value="Spain"> Spain <span class="population">(46.6M)</span></label>
-        <label><input type="checkbox" value="United Kingdom"> United Kingdom <span class="population">(66.4M)</span></label>
-        <label><input type="checkbox" value="Switzerland"> Switzerland <span class="population">(8.6M)</span></label>
-        <label><input type="checkbox" value="Netherlands"> Netherlands <span class="population">(17.2M)</span></label>
-        <label><input type="checkbox" value="Estonia"> Estonia <span class="population">(1.3M)</span></label>
-      </fieldset>
-      <fieldset>
-        <legend>Other</legend>
-        <label><input type="checkbox" value="Taiwan" checked> Taiwan <span class="population">(23.8M)</span></label>
-        <label><input type="checkbox" value="China"> China <span class="population">(1,386M)</span></label>
-        <label><input type="checkbox" value="Korea, South"> Korea, South <span class="population">(51.5M)</span></label>
-        <label><input type="checkbox" value="Japan"> Japan <span class="population">(126.8M)</span></label>
-        <label><input type="checkbox" value="Mongolia"> Mongolia <span class="population">(3.1M)</span></label>
-        <label><input type="checkbox" value="Iran"> Iran <span class="population">(81.2M)</span></label>
-        <label><input type="checkbox" value="Turkey"> Turkey <span class="population">(80.8M)</span></label>
-        <label><input type="checkbox" value="Australia"> Australia <span class="population">(24.6M)</span></label>
-      </fieldset>
+      <div class="worldwide">
+        <h3>Worldwide</h3>
 
-      <div id="chart-confirmed" style="width: 100%; height: 600px;"></div>
-      <div id="chart-deaths" style="width: 100%; height: 600px;"></div>
-      
-      <p>Disclaimer: Recovery data is not very well reported in most jurisdictions</p>
+        <fieldset>
+          <legend>Canada <span class="population">(37.6M)</span></legend>
+          <label><input type="checkbox" value="British Columbia" checked> British Columbia <span class="population">(5.1M)</span></label>
+          <label><input type="checkbox" value="Alberta" checked> Alberta <span class="population">(4.4M)</span></label>
+          <label><input type="checkbox" value="Ontario"> Ontario <span class="population">(14.7M)</span></label>
+          <label><input type="checkbox" value="Quebec"> Quebec <span class="population">(8.5M)</span></label>
+          <label><input type="checkbox" value="Manitoba"> Manitoba <span class="population">(1.4M)</span></label>
+          <label><input type="checkbox" value="Saskatchewan"> Saskatchewan <span class="population">(1.2M)</span></label>
+          <label><input type="checkbox" value="Nova Scotia"> Nova Scotia <span class="population">(1.0M)</span></label>
+          <label><input type="checkbox" value="New Brunswick"> New Brunswick <span class="population">(0.8M)</span></label>
+          <label><input type="checkbox" value="Prince Edward Island"> Prince Edward Island <span class="population">(0.2M)</span></label>
+          <label><input type="checkbox" value="Newfoundland"> Newfoundland <span class="population">(0.5M)</span></label>
+          <label><input type="checkbox" value="Northwest Territories"> Northwest Territories <span class="population">(0.04M)</span></label>
+        </fieldset>
+        <fieldset>
+          <legend>Europe</legend>
+          <label><input type="checkbox" value="Italy"> Italy <span class="population">(60.5M)</span></label>
+          <label><input type="checkbox" value="France"> France <span class="population">(67.0M)</span></label>
+          <label><input type="checkbox" value="Germany"> Germany <span class="population">(82.8M)</span></label>
+          <label><input type="checkbox" value="Spain"> Spain <span class="population">(46.6M)</span></label>
+          <label><input type="checkbox" value="United Kingdom"> United Kingdom <span class="population">(66.4M)</span></label>
+          <label><input type="checkbox" value="Sweden"> Sweden <span class="population">(10.2M)</span></label>
+          <label><input type="checkbox" value="Switzerland"> Switzerland <span class="population">(8.6M)</span></label>
+          <label><input type="checkbox" value="Netherlands"> Netherlands <span class="population">(17.2M)</span></label>
+          <label><input type="checkbox" value="Estonia"> Estonia <span class="population">(1.3M)</span></label>
+        </fieldset>
+        <fieldset>
+          <legend>Other</legend>
+          <label><input type="checkbox" value="US"> USA <span class="population">(327.2M)</span></label>
+          <label><input type="checkbox" value="Taiwan" checked> Taiwan <span class="population">(23.8M)</span></label>
+          <label><input type="checkbox" value="China"> China <span class="population">(1,386M)</span></label>
+          <label><input type="checkbox" value="Korea, South"> Korea, South <span class="population">(51.5M)</span></label>
+          <label><input type="checkbox" value="Japan"> Japan <span class="population">(126.8M)</span></label>
+          <label><input type="checkbox" value="Mongolia"> Mongolia <span class="population">(3.1M)</span></label>
+          <label><input type="checkbox" value="Iran"> Iran <span class="population">(81.2M)</span></label>
+          <label><input type="checkbox" value="Turkey"> Turkey <span class="population">(80.8M)</span></label>
+          <label><input type="checkbox" value="Australia"> Australia <span class="population">(24.6M)</span></label>
+        </fieldset>
+
+        <div id="chart-confirmed" style="width: 100%; height: 600px;"></div>
+        <div id="chart-deaths" style="width: 100%; height: 600px;"></div>
+      </div>
+
+      <div class="usa">
+        <h3>USA</h3>
+
+        <fieldset>
+          <legend>USA <span class="population">(327.2M)</span></legend>
+          <label>California <span class="population">(39.6M)</span></label>
+          <label><input type="checkbox" value="Santa Clara" checked="checked"> Santa Clara County <span class="population">(1.9M)</span></label>
+          <label><input type="checkbox" value="San Francisco" checked="checked"> San Francisco County <span class="population">(0.9M)</span></label>
+          <label><input type="checkbox" value="Alameda"> Alameda County <span class="population">(1.7M)</span></label>
+          <label>New York <span class="population">(19.5M)</span></label>
+          <label><input type="checkbox" value="Kings,New York"> Kings County <span class="population">(2.6M)</span></label>
+          <label><input type="checkbox" value="Queens"> Queens County <span class="population">(2.3M)</span></label>
+          <label><input type="checkbox" value="Bronx"> Bronx County <span class="population">(1.4M)</span></label>
+          <label>Nevada <span class="population">(3.0M)</span></label>
+          <label><input type="checkbox" value="Clark,Nevada"> Clark County <span class="population">(0.6M)</span></label>
+          <label>Hawaii <span class="population">(1.4M)</span></label>
+          <label><input type="checkbox" value="Maui"> Maui County <span class="population">(0.2M)</span></label>
+          <label>Illinois <span class="population">(12.7M)</span></label>
+          <label><input type="checkbox" value="Cook,Illinois"> Cook County <span class="population">(5.1M)</span></label>
+        </fieldset>
+
+        <div id="chart-usa-confirmed" style="width: 100%; height: 600px;"></div>
+  <!--       <div id="chart-usa-deaths" style="width: 100%; height: 600px;"></div> -->
+      </div>
 
       <p>Source: <a href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_time_series" target="_blank">Johns Hopkins Center for Systems Science and Engineering</a></p>
       <p>Data is updated once a day typically around 6pm Pacific Time. See <a href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data" target="_blank">GitHub</a> for latest commit time.</p>
+    </section>
+
+    <section>
+      <h2>Testing Rates</h2>
+      <p>Number of tests being performed daily and the percentage of those test coming back positive.</p>
+      <h3>California</h3>
+      <iframe src="https://coronavirus.jhu.edu/embed/testing/state-data/testing_per_state_California.html" width="736" height="466"></iframe>
+      <h3>USA</h3>
+      <iframe src="https://coronavirus.jhu.edu/embed/testing/state-data/testing_per_state_US.html" width="736" height="466"></iframe>
+      <p>Source: <a href="https://coronavirus.jhu.edu/testing/individual-states/california">Johns Hopkins Coronavirus Resource Center</a></p>
+    </section>
+
+    <section>
+      <h2>Tips</h2>
+      <p>From Early March, 2020:</p>
+      <ul>
+        <li>Exceed government recommendations. You do not want to play chicken with an exponential graph.</li>
+        <li>Assume media coverage is sensationalizing the wrong things. This situation is simultaneously better and worse than they are reporting. Assume reporters are getting it wrong or asking stupid questions and seek underlying sources yourself.</li>
+        <li><a href="https://www.youtube.com/playlist?list=PLmsB3ro8hsUgcZUcWCUC9g1uMg1VzIrXJ" target="_blank">Watch New York Governor Andrew Cuomo's press conferences on YouTube</a> each morning. They are an excellent source of useful data and context that is insightful, direct, and sometimes darkly amusing.</li>
+        <li><a href="https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6" target="_blank">Monitor Johns Hopkins worldwide case tracker dashboard</a> for a current macro view.</li>
+        <li><a href="https://www.washingtonpost.com/graphics/2020/world/corona-simulator/">Read this short Washington Post article</a> that shows simple simulation animations of how different containment strategies play out</li>
+        <li><a href="https://medium.com/@tomaspueyo/coronavirus-act-today-or-people-will-die-f4d3d9cd99ca">Read this long Medium article on why you must act now</a>, understand Chart 7 in detail, learn how to use death rates to estimate spread, and learn how to convince people in power to act now.</li>
+      </ul>
     </section>
 
     <section>
@@ -490,7 +601,7 @@
             <td>Beds: (<a href="https://www.interiorhealth.ca/AboutUs/QuickFacts/PopulationLocalAreaProfiles/Documents/Penticton%20Regional%20Hospital.pdf" target="_blank">140</a> + <a href="https://www.interiorhealth.ca/sites/BuildingPatientCare/PRH/Pages/Phase1.aspx" target="_blank">84</a>) = 224<br>
               Current Occupancy: <a href="https://www.interiorhealth.ca/AboutUs/QuickFacts/PopulationLocalAreaProfiles/Documents/Penticton%20Regional%20Hospital.pdf" target="_blank">90%</a><br>
               ICU Beds: <a href="https://www.interiorhealth.ca/AboutUs/QuickFacts/PopulationLocalAreaProfiles/Documents/Penticton%20Regional%20Hospital.pdf" target="_blank">7</a><br>
-              Ventilators: <span class="unknown">Unknown - I have an email out to Interior Health to find out</span><br>
+              Ventilators: <span class="unknown">Unknown - Interior Health didn't reply to my inquiry</span><br>
             </td>
           </tr>
         </table>
@@ -509,7 +620,7 @@
           </tr>
           <tr>
             <td>Hospital Capacity</td>
-            <td>Beds: Unknown <br>
+            <td>Beds: <span class="unknown">Unknown</span><br>
               Current Occupancy:  <span class="unknown">Unknown</span><br>
               ICU Beds: <span class="unknown">Unknown</span><br>
               Ventilators: <span class="unknown">Unknown</span><br>
@@ -541,7 +652,7 @@
       </div>
 
       <h3>Estimating Hospital Bed Needs</h3>
-      <p>Warning: This is an incredibly naive estimation model that assumes everyone goes to the hospital at the same time</p>
+      <p>Warning: This is an incredibly naive estimation model that assumes everyone goes to the hospital at the same time.</p>
       <div class="select-group">
         <div class="select">
           <span>Area Population</span>
